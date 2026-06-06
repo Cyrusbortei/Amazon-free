@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#131921">
+<title>Amazon Clone</title>
+<style>
+  :root{
+    --bg:#eaeded;--card:#fff;--text:#0f1111;--border:#ddd;--accent:#febd69;--header:#131921;--header-text:#fff;
+  }
+  [data-theme="dark"]{
+    --bg:#0f1111;--card:#232f3e;--text:#fff;--border:#37475a;--accent:#febd69;--header:#232f3e;--header-text:#fff;
+  }
+  [data-theme="darkblue"]{
+    --bg:#131921;--card:#232f3e;--text:#fff;--border:#37475a;--accent:#febd69;--header:#131921;--header-text:#fff;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+  body{background:var(--bg);color:var(--text);font-size:16px;transition:0.3s;}
+  .hidden{display:none!important;}
+
+  /* Auth */
+  .auth{height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .auth-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:32px;width:100%;max-width:380px;}
+  .auth-box h2{text-align:center;margin-bottom:20px;}
+  .auth-box input{width:100%;padding:12px;margin:8px 0;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:16px;}
+  .auth-box button{width:100%;padding:12px;margin-top:12px;background:var(--accent);border:none;border-radius:4px;font-weight:600;font-size:16px;cursor:pointer;}
+  .auth-switch{text-align:center;margin-top:16px;color:var(--text);}
+  .auth-switch span{color:#007185;cursor:pointer;font-weight:600;}
+
+  /* App */
+  header{background:var(--header);color:var(--header-text);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+  .logo{font-size:22px;font-weight:700;}
+  .search-box{flex:1;display:flex;}
+  .search-box input{flex:1;padding:12px;border:none;border-radius:4px 0 0 4px;font-size:16px;}
+  .search-box button{padding:12px 16px;background:var(--accent);border:none;border-radius:0 4px 4px 0;cursor:pointer;font-weight:600;}
+  .cart-btn{position:relative;background:none;border:none;color:var(--header-text);font-size:24px;cursor:pointer;}
+  .cart-count{position:absolute;top:-6px;right:-10px;background:#f08804;color:#000;border-radius:50%;width:20px;height:20px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+  .filters{background:var(--card);padding:12px 16px;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid var(--border);}
+  .filter-btn{padding:8px 14px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:20px;cursor:pointer;white-space:nowrap;font-size:15px;}
+  .filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+
+  .container{max-width:1200px;margin:0 auto;padding:16px;padding-bottom:100px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;}
+  .product{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;transition:box-shadow 0.2s;}
+  .product:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+  .product img{width:100%;aspect-ratio:1;object-fit:contain;margin-bottom:8px;}
+  .product-title{font-size:15px;line-height:1.3;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .product-price{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .product-rating{font-size:14px;color:#007185;margin-bottom:8px;}
+  .add-btn{margin-top:auto;padding:10px;background:var(--accent);border:none;border-radius:20px;cursor:pointer;font-weight:600;font-size:15px;}
+
+  .cart-panel{position:fixed;top:0;right:-400px;width:100%;max-width:380px;height:100vh;background:var(--card);box-shadow:-2px 0 12px rgba(0,0,0,0.2);transition:right 0.3s;z-index:20;display:flex;flex-direction:column;}
+  .cart-panel.open{right:0;}
+  .cart-header{padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:700;}
+  .cart-items{flex:1;overflow-y:auto;padding:16px;}
+  .cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .cart-item img{width:80px;height:80px;object-fit:contain;}
+  .cart-item-info{flex:1;}
+  .qty-controls{display:flex;gap:8px;align-items:center;margin-top:8px;}
+  .qty-controls button{width:28px;height:28px;border:1px solid var(--border);background:var(--bg);cursor:pointer;border-radius:4px;font-size:18px;}
+  .cart-footer{padding:16px;border-top:1px solid var(--border);background:var(--bg);}
+  .checkout-btn{width:100%;padding:12px;background:var(--accent);border:none;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer;}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);}
+  .top-bar select{padding:6px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+  .empty{text-align:center;padding:60px 20px;color:#565959;font-size:16px;}
+</style>
+</head>
+<body data-theme="white">
+
+  <!-- AUTH PAGE -->
+  <div id="authPage" class="auth">
+    <div class="auth-box">
+      <h2>Amazon Clone</h2>
+      <div id="loginForm">
+        <input type="text" id="loginUser" placeholder="Username">
+        <input type="password" id="loginPass" placeholder="Password">
+        <button onclick="login()">Sign In</button>
+        <div class="auth-switch">New here? <span onclick="showSignup()">Create an account</span></div>
+      </div>
+
+      <div id="signupForm" class="hidden">
+        <input type="text" id="signupUser" placeholder="Username">
+        <input type="password" id="signupPass" placeholder="Password">
+        <button onclick="signup()">Create Account</button>
+        <div class="auth-switch">Have an account? <span onclick="showLogin()">Sign in</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="appPage" class="hidden">
+    <header>
+      <div class="logo">amazon</div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
+        <button onclick="filterProducts()">🔍</button>
+      </div>
+      <button class="cart-btn" onclick="toggleCart()">🛒<span class="cart-count" id="cartCount">0</span></button>
+    </header>
+
+    <div class="top-bar">
+      <span>Welcome, <strong id="currentUser"></strong></span>
+      <select onchange="setTheme(this.value)">
+        <option value="white">White</option>
+        <option value="dark">Black</option>
+        <option value="darkblue">Dark Blue</option>
+      </select>
+      <button onclick="logout()" style="padding:6px 12px;border:none;background:#d9534f;color:#fff;border-radius:4px;cursor:pointer;">Logout</button>
+    </div>
+
+    <div class="filters" id="filters"></div>
+    <div class="container">
+      <div class="grid" id="productGrid"></div>
+    </div>
+
+    <div class="cart-panel" id="cartPanel">
+      <div class="cart-header">
+        Shopping Cart
+        <button onclick="toggleCart()" style="background:none;border:none;font-size:24px;cursor:pointer;">×</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer">
+        <div class="cart-total" id="cartTotal">Subtotal: $0.00</div>
+        <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const products=[
+  {id:1,title:"Wireless Headphones",price:49.99,rating:4.3,reviews:1203,category:"Electronics",img:"https://picsum.photos/300/300?random=10"},
+  {id:2,title:"Bluetooth Speaker",price:29.99,rating:4.5,reviews:892,category:"Electronics",img:"https://picsum.photos/300/300?random=11"},
+  {id:3,title:"Running Shoes",price:59.99,rating:4.6,reviews:2100,category:"Sports",img:"https://picsum.photos/300/300?random=12"},
+  {id:4,title:"Coffee Maker",price:39.99,rating:4.2,reviews:540,category:"Home",img:"https://picsum.photos/300/300?random=13"},
+  {id:5,title:"Backpack",price:24.99,rating:4.4,reviews:1100,category:"Fashion",img:"https://picsum.photos/300/300?random=14"},
+  {id:6,title:"Smart Watch",price:79.99,rating:4.1,reviews:670,category:"Electronics",img:"https://picsum.photos/300/300?random=15"},
+  {id:7,title:"Yoga Mat",price:19.99,rating:4.7,reviews:3200,category:"Sports",img:"https://picsum.photos/300/300?random=16"},
+  {id:8,title:"Desk Lamp",price:22.99,rating:4.3,reviews:450,category:"Home",img:"https://picsum.photos/300/300?random=17"}
+];
+
+let currentUser=localStorage.getItem('amz_user');
+let cart=JSON.parse(localStorage.getItem('amz_cart_'+currentUser)||'[]');
+let theme=localStorage.getItem('amz_theme')||'white';
+let activeCategory="All";
+let searchQuery="";
+
+document.body.setAttribute('data-theme',theme);
+if(currentUser)showApp();
+
+function showSignup(){
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.remove('hidden');
+}
+function showLogin(){
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('loginForm').classList.remove('hidden');
+}
+
+function signup(){
+  const u=document.getElementById('signupUser').value.trim();
+  const p=document.getElementById('signupPass').value.trim();
+  if(!u||!p)return alert('Fill all fields');
+  localStorage.setItem('amz_user',u);
+  localStorage.setItem('amz_pass_'+u,p);
+  currentUser=u;
+  cart=[];
+  showApp();
+}
+
+function login(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  const saved=localStorage.getItem('amz_pass_'+u);
+  if(u===localStorage.getItem('amz_user')&&p===saved){
+    currentUser=u;
+    cart=JSON.parse(localStorage.getItem('amz_cart_'+u)||'[]');
+    showApp();
+  }else alert('Invalid username or password');
+}
+
+function showApp(){
+  document.getElementById('authPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+  document.getElementById('currentUser').textContent=currentUser;
+  renderFilters();
+  renderProducts();
+  updateCartCount();
+  renderCart();
+}
+
+function logout(){
+  localStorage.removeItem('amz_user');
+  location.reload();
+}
+
+function setTheme(t){
+  theme=t;
+  document.body.setAttribute('data-theme',t);
+  localStorage.setItem('amz_theme',t);
+}
+
+function renderFilters(){
+  const cats=["All",...new Set(products.map(p=>p.category))];
+  document.getElementById('filters').innerHTML=cats.map(c=>`
+    <button class="filter-btn ${c===activeCategory?'active':''}" onclick="setCategory('${c}')">${c}</button>
+  `).join('');
+}
+
+function setCategory(c){
+  activeCategory=c;
+  renderFilters();
+  renderProducts();
+}
+
+function filterProducts(){
+  searchQuery=document.getElementById('searchInput').value.toLowerCase();
+  renderProducts();
+}
+
+function renderProducts(){
+  let filtered=products;
+  if(activeCategory!=="All")filtered=filtered.filter(p=>p.category===activeCategory);
+  if(searchQuery)filtered=filtered.filter(p=>p.title.toLowerCase().includes(searchQuery)||p.category.toLowerCase().includes(searchQuery));
+
+  const grid=document.getElementById('productGrid');
+  if(!filtered.length){
+    grid.innerHTML=`<div class="empty">No products found</div>`;
+    return;
+  }
+  grid.innerHTML=filtered.map(p=>`
+    <div class="product">
+      <img src="${p.img}" alt="${p.title}">
+      <div class="product-title">${p.title}</div>
+      <div class="product-price">$${p.price.toFixed(2)}</div>
+      <div class="product-rating">⭐ ${p.rating} (${p.reviews})</div>
+      <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(id){
+  const p=products.find(p=>p.id===id);
+  const existing=cart.find(i=>i.id===id);
+  if(existing)existing.qty++;
+  else cart.push({...p,qty:1});
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+function updateQty(id,delta){
+  const item=cart.find(i=>i.id===id);
+  if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0)cart=cart.filter(i=>i.id!==id);
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+function removeFromCart(id){
+  cart=cart.filter(i=>i.id!==id);
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+function saveCart(){
+  localStorage.setItem('amz_cart_'+currentUser,JSON.stringify(cart));
+}
+
+function updateCartCount(){
+  document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.qty,0);
+}
+
+function toggleCart(){
+  document.getElementById('cartPanel').classList.toggle('open');
+  renderCart();
+}
+
+function renderCart(){
+  const cartItems=document.getElementById('cartItems');
+  const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  if(!cart.length){
+    cartItems.innerHTML=`<div class="empty">Your cart is empty</div>`;
+    document.getElementById('cartTotal').textContent=`Subtotal: $0.00`;
+    return;
+  }
+  cartItems.innerHTML=cart.map(item=>`
+    <div class="cart-item">
+      <img src="${item.img}">
+      <div class="cart-item-info">
+        <div class="product-title">${item.title}</div>
+        <div class="product-price">$${item.price.toFixed(2)}</div>
+        <div class="qty-controls">
+          <button onclick="updateQty(${item.id},-1)">-</button>
+          <span>${item.qty}</span>
+          <button onclick="updateQty(${item.id},1)">+</button>
+          <button onclick="removeFromCart(${item.id})" style="margin-left:auto;color:#d00;border:none;background:none;cursor:pointer;">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cartTotal').textContent=`Subtotal: $${total.toFixed(2)}`;
+}
+
+function checkout(){
+  if(!cart.length)return;
+  alert(`Order placed! Total: $${cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2)}\nDemo only.`);
+  cart=[];
+  saveCart();
+  updateCartCount();
+  toggleCart();
+}
+</script>
+</body>
+</html>
